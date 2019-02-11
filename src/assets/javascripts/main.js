@@ -8,26 +8,26 @@ const anchorOffsets = [];
 // スクロール位置を測定する要素を設定
 let documentElement  = null;
 if (navigator.userAgent.toLowerCase().match(/webkit|msie 5/)) {
-	// Webkit系（Safari, Chrome, iOS）判定
-	if(navigator.userAgent.indexOf('Chrome') != -1){
-		// Chromeはhtml要素
-		documentElement = document.documentElement;
-	} else {
-		// Chrome以外はbody要素
-		documentElement = document.body;
-	}
+  // Webkit系（Safari, Chrome, iOS）判定
+  if(navigator.userAgent.indexOf('Chrome') != -1){
+    // Chromeはhtml要素
+    documentElement = document.documentElement;
+  } else {
+    // Chrome以外はbody要素
+    documentElement = document.body;
+  }
 } else {
-	// IE（6以上）、Firefox、Operaはhtml要素
-	documentElement = document.documentElement;
+  // IE（6以上）、Firefox、Operaはhtml要素
+  documentElement = document.documentElement;
 }
 
 const toggleFloatingNav = (scrollTop) => {
   const showPoint = anchorStartFlag ? anchorStartFlag : anchorOffsets[0];
-	if (scrollTop > showPoint) {
-		floatingNav.classList.add('js-show');
-	} else {
-		floatingNav.classList.remove('js-show');
-	}
+  if (scrollTop > showPoint) {
+    floatingNav.classList.add('js-show');
+  } else {
+    floatingNav.classList.remove('js-show');
+  }
 }
 
 const createAnchorList = () => {
@@ -56,7 +56,7 @@ const highlightCurrentAnchor = (scrollTop) => {
 }
 
 window.onload = () => {
-	createAnchorList();
+  createAnchorList();
 }
 
 window.onscroll = (event) => {
