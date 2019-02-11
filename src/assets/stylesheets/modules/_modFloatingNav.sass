@@ -1,0 +1,43 @@
+@charset 'utf-8'
+
+.modFloatingNav
+  position: fixed
+  top: 0
+  left: 0
+  z-index: 9999
+  width: 100%;
+  box-shadow: none
+  opacity: 0.9
+  transition: all 0.2s linear
+  // transform: translateY(-56px)
+
+  &.js-show
+    transform: translateY(0)
+
+  &__list
+    &::after
+      display: block
+      height: 0
+      content: ''
+      clear: both
+      visibility: hidden
+
+  &__listItem
+    box-sizing: border-box
+    float: left
+    // width: 33.3333%
+    // height: 56px
+    list-style-type: none
+
+    &:last-child
+      border-right: none
+
+  &__anchor
+    position: relative;
+    display: block
+    width: 100%
+    height: 100%
+    text-decoration: none
+
+    // &.js-active
+      // opacity: 0.5

@@ -1,0 +1,96 @@
+@charset 'utf-8'
+
+@import 'modules/_modFloatingNav'
+
+*
+  margin: 0
+  padding: 0
+
+.header
+  width: 100%
+  background-color: #9E9E9E
+
+  h1
+    padding: 7px 10px 7px
+    font-size: 24px
+
+.top
+  width: 100%
+  height: 250px
+
+  h2
+    padding: 8px 10px 8px
+    background-color: #BDBDBD
+    font-size: 16px
+
+.section1
+  width: 100%
+  height: 250px
+
+  h2
+    padding: 8px 10px 8px
+    background-color: #BDBDBD
+    font-size: 16px
+
+.section2
+  width: 100%
+  height: 250px
+
+  h2
+    padding: 8px 10px 8px
+    background-color: #BDBDBD
+    font-size: 16px
+
+.section3
+  width: 100%
+  height: 250px
+
+  h2
+    padding: 8px 10px 8px
+    background-color: #BDBDBD
+    font-size: 16px
+
+.section1,
+.section2,
+.section3
+  margin-top: -56px
+  padding-top: 56px
+
+.footer
+  width: 100%
+  height: 750px
+  background-color: #9E9E9E
+
+  p
+    padding: 10px 10px
+    font-size: 24px
+    font-weight: bold
+
+a[href="#anc01"]
+  background-color: #e57373
+
+a[href="#anc02"]
+  background-color: #A5D6A7
+
+a[href="#anc03"]
+  background-color: #42A5F5
+
+// modFloagingNav ユニーク設定
+// -----------------------------------------------------------
+.modFloatingNav
+  transform: translateY(-56px)
+
+  &__listItem
+    width: 33.3333%
+    height: 56px
+
+  &__anchor
+    &.js-active
+      opacity: 0.2
+
+    span
+      position: absolute
+      top: 50%
+      left: 50%
+      transform: translate(-50%, -50%)
+      text-align: center
