@@ -1,4 +1,4 @@
-const floatingNav = document.querySelector('.modFloatingNav');
+const floatingNav = document.querySelector('.js-floatingNav');
 const floatingNavAnchors = floatingNav.getElementsByTagName('a');
 const anchorStartFlag = document.querySelector('.js-floatingNav-startFlag');
 const anchorFlags = document.querySelectorAll('.js-floatingNav-flag');
@@ -21,24 +21,30 @@ if (navigator.userAgent.toLowerCase().match(/webkit|msie 5/)) {
   documentElement = document.documentElement;
 }
 
+const createAnchorList = () => {
+  if (!(anchorFlags.length > 0)) return;
+
+  const floatingNavHeight = floatingNav.offsetHeight;
+
+  if (anchorStartFlag) anchorOffsets[0] = anchorStartFlag.offsetHeight;
+
+  Array.prototype.forEach.call(anchorFlags, (elem, i) => {
+    if (anchorStartFlag) i = i + 1;
+
+    anchorOffsets[i] = elem.offsetTop - floatingNavHeight;
+  });
+
+  if (anchorEndFlag) anchorOffsets.push(anchorEndFlag.offsetTop - floatingNavHeight);
+  else anchorOffsets.push(documentElement.offsetHeight);
+}
+
 const toggleFloatingNav = (scrollTop) => {
-  const showPoint = anchorStartFlag ? anchorStartFlag : anchorOffsets[0];
+  const showPoint = anchorStartFlag ? anchorStartFlag.offsetTop : anchorOffsets[0];
   if (scrollTop > showPoint) {
     floatingNav.classList.add('js-show');
   } else {
     floatingNav.classList.remove('js-show');
   }
-}
-
-const createAnchorList = () => {
-  if (!(anchorFlags.length > 0)) return;
-
-  Array.prototype.forEach.call(anchorFlags, (elem, i) => {
-    anchorOffsets[i] = elem.offsetTop;
-  });
-
-  if (anchorEndFlag) anchorOffsets.push(anchorEndFlag.offsetTop);
-  else anchorOffsets.push(600);
 }
 
 const highlightCurrentAnchor = (scrollTop) => {
@@ -49,6 +55,8 @@ const highlightCurrentAnchor = (scrollTop) => {
   });
 
   Array.prototype.forEach.call(floatingNavAnchors, (elem, i) => {
+    if (anchorStartFlag) i = i + 1;
+
     if (anchorOffsets[i] < scrollTop && scrollTop < anchorOffsets[i + 1]) {
       elem.classList.add('js-active');
     }
@@ -59,7 +67,7 @@ window.onload = () => {
   createAnchorList();
 }
 
-window.onscroll = (event) => {
+window.onscroll = () => {
   let scrollTop = documentElement.scrollTop;
   toggleFloatingNav(scrollTop);
   highlightCurrentAnchor(scrollTop);
