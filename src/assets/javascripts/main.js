@@ -5,22 +5,6 @@ const anchorFlags = document.querySelectorAll('.js-floatingNav-flag');
 const anchorEndFlag = document.querySelector('.js-floatingNav-endFlag');
 const anchorOffsets = [];
 
-// スクロール位置を測定する要素を設定
-let documentElement  = null;
-if (navigator.userAgent.toLowerCase().match(/webkit|msie 5/)) {
-  // Webkit系（Safari, Chrome, iOS）判定
-  if(navigator.userAgent.indexOf('Chrome') != -1){
-    // Chromeはhtml要素
-    documentElement = document.documentElement;
-  } else {
-    // Chrome以外はbody要素
-    documentElement = document.body;
-  }
-} else {
-  // IE（6以上）、Firefox、Operaはhtml要素
-  documentElement = document.documentElement;
-}
-
 const createAnchorList = () => {
   if (!(anchorFlags.length > 0)) return;
 
@@ -35,7 +19,7 @@ const createAnchorList = () => {
   });
 
   if (anchorEndFlag) anchorOffsets.push(anchorEndFlag.offsetTop - floatingNavHeight);
-  else anchorOffsets.push(documentElement.offsetHeight);
+  else anchorOffsets.push(document.body.offsetHeight);
 }
 
 const toggleFloatingNav = (scrollTop) => {
@@ -68,10 +52,7 @@ window.onload = () => {
 }
 
 window.onscroll = () => {
-  let scrollTop = documentElement.scrollTop;
+  let scrollTop = document.documentElement.scrollTop || document.body.srcollTop;
   toggleFloatingNav(scrollTop);
   highlightCurrentAnchor(scrollTop);
 }
-
-
-// todo 最後のnavFlog要素の終わりのポイントを取得したい。
