@@ -123,7 +123,6 @@ class FloatingNav01 {
       const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
       this.toggleFloatingNav(scrollTop);
       this.highlightCurrentAnchor(scrollTop);
-      this.getNextHighlightedAnchorIndex(scrollTop);
     };
   }
 }
