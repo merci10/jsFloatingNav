@@ -2,20 +2,23 @@ class FloatingNav01 {
   constructor({ isStarting = true } = {}) {
     this.floatingNav = document.querySelector('.js-floatingNav');
     this.floatingNavAnchors = this.floatingNav.getElementsByTagName('a');
-    // floatingNav表示開始位置を決める ※.js-floatingNav-startFlagは必須
-    this.startFlag = document.querySelector('.js-floatingNav-startFlag');
-    // highlight位置を決める
-    this.flags = document.querySelectorAll('.js-floatingNav-flag');
-    // highlightの終了位置を決める（表示終了位置ではない）
-    this.endFlag = document.querySelector('.js-floatingNav-endFlag');
-    this.isExistStartFlag = !!this.startFlag;
-    this.isExistFlags = !!this.flags;
-    this.isExistEndFlag = !!this.endFlag;
-    // flagのoffsetTopの数値を入れる（highlightさせる位置)
-    this.flagOffsetsList = [];
+    this.floatingNavHeight = this.floatingNav.offsetHeight;
     // hightlightのタイミングを微調整する値
-    this.tuningNum = 5;
-    this.nowHighlitedAnchorIndex = 999;
+    this.tuningNum = 10;
+    // floatingNav表示開始位置を決める ※.js-floatingNav-appearFlagは必須
+    this.appearFlag = document.querySelector('.js-floatingNav-appearFlag');
+    // floatingNavの表示開始位置
+    this.appearPoint = this.appearFlag.offsetTop - this.floatingNavHeight - this.tuningNum;
+    // highlight位置を決める
+    this.highlightFlags = document.querySelectorAll('.js-floatingNav-highlightFlag');
+    // highlightの終了位置を決める（表示終了位置ではない）
+    this.endHighlightFlag = document.querySelector('.js-floatingNav-endHighlightFlag');
+    this.isExistedAppearFlag = !!this.appearFlag;
+    this.isExistedHighlightFlags = !!this.highlightFlags;
+    this.isExistedEndHighlightFlag = !!this.endHighlightFlag;
+    // flagのoffsetTopの数値を入れる
+    this.highlightFlagOffsetsList = [];
+    this.nowHighlightedAnchorIndex = 999;
     // lint error "Do not use 'new' for side effects" 対策
     if (isStarting) {
       this.init();
@@ -24,35 +27,34 @@ class FloatingNav01 {
 
   /**
    * flagのoffsetTopで配列を作成
-   * @param {Number} floatingNavHeight
+   * highlightFlags endHighlightFlag の順番に入れる
    */
   createAnchorOffsetTopList() {
-    if (!this.isExistStartFlag) return; // .js-floatingNav-startFlagがなければ処理を終了
+    // .js-floatingNav-appearFlagと.js-floatingNav-highlightFlagどちらも必要
+    if (!this.isExistedAppearFlag || !this.isExistedHighlightFlags) return;
 
-    const floatingNavHeight = this.floatingNav.offsetHeight;
-
-    this.flagOffsetsList[0] = this.startFlag.offsetTop - floatingNavHeight - this.tuningNum;
-    Array.prototype.forEach.call(this.flags, (flag, i) => {
-      this.flagOffsetsList[i + 1] = flag.offsetTop - floatingNavHeight - this.tuningNum;
+    // highlightFlagsを先に入れる
+    Array.prototype.forEach.call(this.highlightFlags, (flag, i) => {
+      this.highlightFlagOffsetsList[i] = flag.offsetTop - this.floatingNavHeight - this.tuningNum;
     });
 
-    if (this.isExistEndFlag) {
-      // endFlagがあれば配列の最後にendFlagのoffsetTopを追加
-      this.flagOffsetsList.push(this.endFlag.offsetTop - floatingNavHeight);
+    if (this.isExistedEndHighlightFlag) {
+      // endHightlightFlagがあれば配列の最後にendHighlightFlagのoffsetTopを追加
+      this.highlightFlagOffsetsList.push(this.endHighlightFlag.offsetTop - this.floatingNavHeight);
     } else {
-      // endFlagがなければbody要素の高さを追加(画面最下部のoffsetTopを追加)
-      this.flagOffsetsList.push(document.body.offsetHeight);
+      // endHightlightFlagがなければbody要素の高さを追加(画面の高さを追加)
+      this.highlightFlagOffsetsList.push(document.body.offsetHeight);
     }
   }
 
   /**
    * scrollTopによってfloatingNavを表示非表示にする
-   * @param {Number} scrollTop window.scrollTop
-   * @param {Number} showPoint floatingNavの表示開始位置
+   * @param {Number} scrollTop 画面トップからの位置
    */
   toggleFloatingNav(scrollTop) {
-    const showPoint = this.flagOffsetsList[0];
-    if (scrollTop > showPoint) {
+    if (!this.isExistedAppearFlag) return;
+
+    if (scrollTop > this.appearPoint) {
       this.floatingNav.classList.add('js-show');
     } else {
       this.floatingNav.classList.remove('js-show');
@@ -61,58 +63,53 @@ class FloatingNav01 {
 
   /**
    * scrollTopによってfloatingNavのstyleを変更させるクラスを付与する
-   * @param {Number} scrollTop window.scrollTop
+   * @param {Number} scrollTop 画面トップからの位置
+   * @param {Number} shouldHighlightedAnchorIndex getHighlightedAnchorIndex関数の戻り値を入れる変数
    */
   highlightCurrentAnchor(scrollTop) {
-    // .js-floatingNav-startFlagと.js-floatingNav-flagどちらも必要
-    if (!this.isExistStartFlag || !this.isExistFlags) return;
+    // .js-floatingNav-appearFlagと.js-floatingNav-highlightFlagどちらも必要
+    if (!this.isExistedAppearFlag || !this.isExistedHighlightFlags) return;
 
-    const nextHighlightedAnchorIndex = this.getNextHighlightedAnchorIndex(scrollTop);
+    const shouldHighlightedIndex = this.getShouldHighlightedAnchorIndex(scrollTop);
 
-    if (nextHighlightedAnchorIndex !== 999) {
-      this.floatingNavAnchors[nextHighlightedAnchorIndex].classList.add('js-active');
-      if (this.nowHighlitedAnchorIndex === nextHighlightedAnchorIndex) return;
-      this.floatingNavAnchors[this.nowHighlitedAnchorIndex].classList.remove('js-active');
-      this.nowHighlitedAnchorIndex = nextHighlightedAnchorIndex;
+    if (shouldHighlightedIndex !== 999) {
+      this.floatingNavAnchors[shouldHighlightedIndex].classList.add('js-active');
+      // 早期リターン
+      if (this.nowHighlightedAnchorIndex === shouldHighlightedIndex) return;
+      this.floatingNavAnchors[this.nowHighlightedAnchorIndex].classList.remove('js-active');
+      this.nowHighlightedAnchorIndex = shouldHighlightedIndex;
     }
 
-    if (nextHighlightedAnchorIndex === 999 && this.nowHighlitedAnchorIndex !== 999) {
-      this.floatingNavAnchors[this.nowHighlitedAnchorIndex].classList.remove('js-active');
+    if (this.nowHighlightedAnchorIndex !== 999 && shouldHighlightedIndex === 999) {
+      this.floatingNavAnchors[this.nowHighlightedAnchorIndex].classList.remove('js-active');
     }
-
-    // Array.prototype.forEach.call(this.floatingNavAnchors, (anchor) => {
-    //   anchor.classList.remove('js-active');
-    // });
-
-    // Array.prototype.forEach.call(this.floatingNavAnchors, (anchor, i) => {
-    //   if ((this.flagOffsetsList[i + 1]) < scrollTop && scrollTop <= (this.flagOffsetsList[i + 2])) {
-    //     anchor.classList.add('js-active');
-    //   }
-    // });
   }
 
   /**
-   * 次にhighlightされるべきanchorをindex番号で返す
-   * @return {Number} anchorが4つの場合は0 ~ 3の数値、nextHighlightedAnchorIndexがundefinedのままなら999
+   * highlightされていないといけないanchorのindex番号を返す
+   * @param {Number} index
+   * @return {Number} anchorが4つの場合は0 ~ 3の数値、shouldHighlightedAnchorIndexがundefinedのままなら999
    */
-  getNextHighlightedAnchorIndex(scrollTop) {
-    let nextHighlightedAnchorIndex;
-    for (let i = 0; i < this.flagOffsetsList.length - 2; i += 1) {
-      if ((this.flagOffsetsList[i + 1]) < scrollTop && scrollTop <= (this.flagOffsetsList[i + 2])) {
-        nextHighlightedAnchorIndex = i;
+  getShouldHighlightedAnchorIndex(scrollTop) {
+    let index;
+    for (let i = 0; i < this.highlightFlagOffsetsList.length - 1; i += 1) {
+      if (this.highlightFlagOffsetsList[i] < scrollTop && scrollTop <= this.highlightFlagOffsetsList[i + 1]) {
+        index = i;
       }
     }
-    if (nextHighlightedAnchorIndex === undefined) nextHighlightedAnchorIndex = 999;
 
-    if (this.nowHighlitedAnchorIndex === 999 && nextHighlightedAnchorIndex != 999) {
-      this.nowHighlitedAnchorIndex = nextHighlightedAnchorIndex;
-    }
+    if (index === undefined) index = 999;
 
-    return nextHighlightedAnchorIndex;
+    // this.nowHighlightedAnchorIndexの初期値を更新 これがないとhighlightCurrentAnchor関数内でのクラスの付け外しの部分でエラーがでてしまう
+    if (this.nowHighlightedAnchorIndex === 999 &&
+      index !== 999) this.nowHighlightedAnchorIndex = index;
+
+    return index;
   }
 
   /**
    * 初期化
+   * @param {Number} scrollTop 画面トップからの位置
    */
   init() {
     window.onload = () => {
